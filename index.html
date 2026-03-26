@@ -2,38 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SECURITY RECCE REPORT</title>
+    <title>Recce Report V31 - Zero Overflow</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     
     <style>
+        /* A4 Precision - Reduced height by 1mm to prevent blank pages */
         @page { size: A4; margin: 0; }
         * { box-sizing: border-box; -webkit-print-color-adjust: exact; }
         body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background: #34495e; color: #333; }
 
         .page {
-            width: 210mm; height: 296mm; padding: 15mm 20mm; margin: 10mm auto;
-            background: white; position: relative; display: flex; flex-direction: column;
-            page-break-after: always; overflow: hidden; border: 1px solid #ddd;
+            width: 210mm; 
+            height: 295mm; 
+            padding: 12mm 18mm; 
+            margin: 10mm auto;
+            background: white;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            page-break-after: always;
+            page-break-inside: avoid;
+            overflow: hidden;
+            border: 1px solid #ddd;
         }
 
+        /* Controls */
         .controls-menu { 
             position: fixed; top: 10px; left: 10px; z-index: 9999; 
             background: #fff; padding: 12px; border-radius: 8px; width: 210px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
-
         .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
         .tool-btn { padding: 8px; border: 1px solid #ddd; background: #f8f9fa; cursor: pointer; font-size: 11px; text-align: center; border-radius: 4px; font-weight: bold; }
-        .color-row { display: flex; justify-content: space-around; margin-bottom: 12px; padding: 8px; background: #f1f1f1; border-radius: 4px; }
-        .dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid white; }
+        .dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid white; display: inline-block; margin-right: 5px; }
         .dot.active { border-color: #333; transform: scale(1.1); }
         .btn-main { width: 100%; padding: 12px; margin-bottom: 6px; cursor: pointer; font-weight: bold; border: none; border-radius: 4px; color: white; }
 
+        /* Report Structure */
         .header { font-size: 10px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; display: flex; justify-content: space-between; font-weight: bold; }
-        
         .footer { 
-            position: absolute; bottom: 10mm; left: 20mm; right: 20mm; 
+            position: absolute; bottom: 8mm; left: 18mm; right: 18mm; 
             font-size: 9px; border-top: 1px solid #ccc; padding-top: 5px; 
             display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center;
         }
@@ -44,26 +53,24 @@
         .data-table td { border: 2.5px solid #000; padding: 10px; font-size: 13px; vertical-align: top; }
         .label { background: #f2f2f2; width: 35%; font-weight: bold; }
 
-        .photo-block { flex: 1; display: flex; flex-direction: column; margin-bottom: 10px; position: relative; }
-        .canvas-wrapper { border: 2.5px solid #000; background: #fafafa; width: 100%; height: 80mm; overflow: hidden; position: relative; }
+        .photo-block { flex: 1; display: flex; flex-direction: column; margin-bottom: 8px; position: relative; }
+        .canvas-wrapper { border: 2.5px solid #000; background: #fafafa; width: 100%; height: 75mm; overflow: hidden; position: relative; }
         .canvas-wrapper.active-photo { border-color: #3498db; }
-        .hint-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #aaa; pointer-events: none; font-weight: bold; }
         
         input, select, textarea { width: 100%; border: 2px solid #000; padding: 8px; font-size: 13px; outline: none; margin-top: 2px; }
-        textarea { height: 26mm; resize: none; }
+        textarea { height: 25mm; resize: none; }
 
         .note-area { flex: 1; margin: 10px 0; display: flex; flex-direction: column; }
-        .note-area textarea { flex: 1; height: auto; min-height: 200mm; }
+        .note-area textarea { flex: 1; height: auto; min-height: 150mm; }
 
-        .sig-container { align-self: flex-end; width: 75mm; margin-top: 15px; margin-bottom: 20px; }
-        .sig-box { border: 2px dashed #000; background: #fff; height: 35mm; width: 100%; padding: 5px; }
-        .clear-btn { background: #e67e22; color: white; border: none; padding: 4px 8px; font-size: 10px; cursor: pointer; border-radius: 3px; margin-bottom: 4px; }
+        .sig-container { align-self: flex-end; width: 70mm; margin-top: 5px; margin-bottom: 25px; }
+        .sig-box { border: 2px dashed #000; background: #fff; height: 32mm; width: 100%; }
 
         @media print { 
             body { background: white; }
-            .page { margin: 0; border: none; box-shadow: none; }
+            .page { margin: 0; border: none; box-shadow: none; width: 210mm; height: 295mm; padding: 12mm 18mm; }
             .no-print, .controls-menu { display: none !important; } 
-            textarea, input { border: none !important; }
+            input, textarea { border: 2px solid #000 !important; }
         }
     </style>
 </head>
@@ -71,7 +78,7 @@
 
 <div class="controls-menu no-print">
     <div style="font-size: 11px; font-weight: bold; margin-bottom: 6px;">1. ICON COLOR</div>
-    <div class="color-row">
+    <div style="margin-bottom: 10px;">
         <div class="dot active" style="background: #FF0000;" onclick="handleColorClick('#FF0000', this)"></div>
         <div class="dot" style="background: #FFFF00;" onclick="handleColorClick('#FFFF00', this)"></div>
         <div class="dot" style="background: #0000FF;" onclick="handleColorClick('#0000FF', this)"></div>
@@ -88,14 +95,14 @@
     <button class="btn-main" style="background: #8e44ad;" onclick="addNewNotePage()">+ NOTE PAGE</button>
     <button class="btn-main" style="background: #f1c40f; color: #000;" onclick="saveDraft()">SAVE DRAFT</button>
     <button class="btn-main" style="background: #e74c3c;" onclick="loadDraft()">RECOVER DRAFT</button>
-    <button class="btn-main" id="save-btn" style="background: #2980b9;" onclick="window.print()">SAVE PDF</button>
+    <button class="btn-main" id="save-btn" style="background: #2980b9;" onclick="triggerFullSyncPrint()">SAVE PDF</button>
 </div>
 
 <div id="capture-zone">
     <div class="page">
         <div class="header"><span>RECCE ID: <span class="id-txt">---</span></span><span>CONFIDENTIAL</span></div>
-        <h1 style="text-align:center; margin-top: 40px;">SECURITY RECCE REPORT</h1>
-        <div style="display: flex; flex-direction: column; align-items: center; margin: 30px 0;">
+        <h1 style="text-align:center; margin-top: 30px;">SECURITY RECCE REPORT</h1>
+        <div style="display: flex; flex-direction: column; align-items: center; margin: 25px 0;">
             <div id="qrcode"></div>
             <p style="font-family: monospace; font-weight: bold; margin-top: 10px;">ID: <span class="id-txt">---</span></p>
         </div>
@@ -110,31 +117,23 @@
             <tr><td class="label">LEAD OFFICER</td><td><input type="text" placeholder="Example: Name" class="save-input"></td></tr>
             <tr><td class="label">DATE OF VISIT</td><td><input type="date" class="save-input"></td></tr>
         </table>
-        <div class="footer">
-            <span>VENUE: <span class="f-v">---</span></span>
-            <span class="center-warn">PRIVATE & CONFIDENTIAL - AUTHORIZED ACCESS ONLY</span>
-            <span class="right-pg">PAGE 1</span>
-        </div>
+        <div class="footer"><span>VENUE: <span class="f-v">---</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL - AUTHORIZED ACCESS ONLY</span><span class="right-pg">PAGE 1</span></div>
     </div>
 
     <div class="page">
         <div class="header"><span>ID: <span class="id-txt">---</span></span><span>LOGISTICS</span></div>
         <table class="data-table">
             <tr><td class="label">ADDRESS</td><td><textarea placeholder="Example: 19 Island Rd, Deep Water Bay" class="save-input"></textarea></td></tr>
-            <tr><td class="label">CONTACT PERSON</td><td><input type="text" placeholder="Example: Name" class="save-input"></td></tr>
+            <tr><td class="label">CONTACT PERSON</td><td><input type="text" placeholder="Example: Alan Tam" class="save-input"></td></tr>
             <tr><td class="label">PHONE NUMBER</td><td><input type="tel" placeholder="Example: +852 1234 5678" class="save-input"></td></tr>
-            <tr><td class="label">PURPOSE OF VISIT</td><td><textarea style="height:110px;" placeholder="Example: Golf, Work, School, Appointment" class="save-input"></textarea></td></tr>
+            <tr><td class="label">PURPOSE OF VISIT</td><td><textarea style="height:100px;" placeholder="Example: Golf, school, appointment" class="save-input"></textarea></td></tr>
         </table>
         <div class="sig-container">
-            <div class="no-print" style="text-align:right;"><button class="clear-btn" onclick="clearSignature()">CLEAR SIGNATURE</button></div>
+            <div class="no-print" style="text-align:right;"><button style="background:#e67e22; color:white; border:none; padding:4px; font-size:10px;" onclick="clearSignature()">CLEAR SIG</button></div>
             <div class="sig-box"><canvas id="sig-canvas"></canvas></div>
-            <div style="font-size: 11px; font-weight: bold; margin-top: 8px; text-align: center; border-top: 1px solid #000; padding-top: 4px;">REVIEWER SIGNATURE</div>
+            <div style="font-size: 11px; font-weight: bold; margin-top: 5px; text-align: center; border-top: 1px solid #000;">REVIEWER SIGNATURE</div>
         </div>
-        <div class="footer">
-            <span>VENUE: <span class="f-v">---</span></span>
-            <span class="center-warn">PRIVATE & CONFIDENTIAL - AUTHORIZED ACCESS ONLY</span>
-            <span class="right-pg">PAGE 2</span>
-        </div>
+        <div class="footer"><span>VENUE: <span class="f-v">---</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL - AUTHORIZED ACCESS ONLY</span><span class="right-pg">PAGE 2</span></div>
     </div>
     <div id="dynamic-container"></div>
 </div>
@@ -142,7 +141,8 @@
 <script>
     const reportID = "REC-" + Math.floor(100000 + Math.random() * 900000);
     document.querySelectorAll('.id-txt').forEach(e => e.innerText = reportID);
-    new QRCode(document.getElementById("qrcode"), { text: reportID, width: 130, height: 130 });
+    const driveSearchURL = `https://drive.google.com/drive/search?q=${reportID}`;
+    new QRCode(document.getElementById("qrcode"), { text: driveSearchURL, width: 130, height: 130 });
 
     let activeColor = '#FF0000';
     let canvases = [];
@@ -151,10 +151,18 @@
 
     window.onload = () => {
         const el = document.getElementById('sig-canvas');
-        sigCanvas = new fabric.Canvas(el, { width: 270, height: 130, isDrawingMode: true, backgroundColor: '#fff' });
+        sigCanvas = new fabric.Canvas(el, { width: 260, height: 115, isDrawingMode: true, backgroundColor: '#fff' });
         sigCanvas.freeDrawingBrush.color = "#000";
         sigCanvas.freeDrawingBrush.width = 2;
     };
+
+    function triggerFullSyncPrint() {
+        document.title = reportID;
+        canvases.forEach(c => { c.discardActiveObject(); c.renderAll(); });
+        if(sigCanvas) { sigCanvas.discardActiveObject(); sigCanvas.renderAll(); }
+        document.querySelectorAll('.canvas-wrapper').forEach(w => w.classList.remove('active-photo'));
+        window.print();
+    }
 
     function clearSignature() { if (sigCanvas) { sigCanvas.clear(); sigCanvas.backgroundColor = '#fff'; sigCanvas.renderAll(); } }
     function handleColorClick(color, el) {
@@ -177,13 +185,13 @@
         pageDiv.className = 'page dynamic-page photo-page';
         const pageNum = document.querySelectorAll('.page').length + 1;
         pageDiv.innerHTML = `
-            <div class="header"><span>ID: ${reportID}</span><button class="no-print" style="background:red; color:white; border:none; padding:4px; font-size:9px;" onclick="this.closest('.page').remove()">REMOVE PAGE</button></div>
+            <div class="header"><span>ID: ${reportID}</span><button class="no-print" style="background:red; color:white; border:none; padding:4px; font-size:9px;" onclick="this.closest('.page').remove()">REMOVE</button></div>
             ${photoBlock(1)}${photoBlock(2)}
-            <div class="footer"><span>VENUE: <span class="f-v">${v}</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL - AUTHORIZED ACCESS ONLY</span><span class="right-pg">PAGE ${pageNum}</span></div>
+            <div class="footer"><span>VENUE: <span class="f-v">${v}</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL</span><span class="right-pg">PAGE ${pageNum}</span></div>
         `;
         parent.appendChild(pageDiv);
         pageDiv.querySelectorAll('.f-canvas').forEach(canvasEl => {
-            const fCanvas = new fabric.Canvas(canvasEl, { width: 660, height: 285, backgroundColor: '#f9f9f9' });
+            const fCanvas = new fabric.Canvas(canvasEl, { width: 640, height: 280, backgroundColor: '#f9f9f9' });
             canvases.push(fCanvas);
             fCanvas.on('mouse:down', () => setFocus(fCanvas));
         });
@@ -196,9 +204,9 @@
         pageDiv.className = 'page dynamic-page note-page';
         const pageNum = document.querySelectorAll('.page').length + 1;
         pageDiv.innerHTML = `
-            <div class="header"><span>ID: ${reportID}</span><button class="no-print" style="background:red; color:white; border:none; padding:4px; font-size:9px;" onclick="this.closest('.page').remove()">REMOVE PAGE</button></div>
-            <div class="note-area"><strong style="font-size: 14px;">ADDITIONAL NOTES & EQUIPMENT LIST</strong><textarea class="save-input" placeholder="Example: First Aid Kits, Sportswear..."></textarea></div>
-            <div class="footer"><span>VENUE: <span class="f-v">${v}</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL - AUTHORIZED ACCESS ONLY</span><span class="right-pg">PAGE ${pageNum}</span></div>
+            <div class="header"><span>ID: ${reportID}</span><button class="no-print" style="background:red; color:white; border:none; padding:4px; font-size:9px;" onclick="this.closest('.page').remove()">REMOVE</button></div>
+            <div class="note-area"><strong>ADDITIONAL NOTES</strong><textarea class="save-input"></textarea></div>
+            <div class="footer"><span>VENUE: <span class="f-v">${v}</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL</span><span class="right-pg">PAGE ${pageNum}</span></div>
         `;
         parent.appendChild(pageDiv);
     }
@@ -207,9 +215,9 @@
         return `
             <div class="photo-block">
                 <div class="no-print" style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                    <input type="file" style="width:70%; border:none;" onchange="handleImage(this)"><button class="clear-btn" style="background:#e67e22;" onclick="clearPhoto(this)">CLEAR</button>
+                    <input type="file" style="width:70%; border:none;" onchange="handleImage(this)"><button style="background:#e67e22; color:white; border:none; padding:2px 6px; font-size:10px;" onclick="clearPhoto(this)">CLEAR</button>
                 </div>
-                <div class="canvas-wrapper"><canvas class="f-canvas"></canvas><div class="hint-text">UPLOAD PHOTO ${num}</div></div>
+                <div class="canvas-wrapper"><canvas class="f-canvas"></canvas></div>
                 <textarea class="save-input" placeholder="Notes for Photo ${num}"></textarea>
             </div>
         `;
@@ -226,7 +234,6 @@
                     scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fCanvas.width / 2, top: fCanvas.height / 2,
                     selectable: false, evented: false
                 });
-                wrapper.querySelector('.hint-text').style.display = 'none';
                 setFocus(fCanvas);
             });
         };
@@ -236,7 +243,7 @@
     function clearPhoto(btn) {
         const block = btn.closest('.photo-block');
         const fCanvas = canvases.find(c => c.getElement() === block.querySelector('canvas'));
-        if (fCanvas) { fCanvas.clear(); fCanvas.setBackgroundImage(null, fCanvas.renderAll.bind(fCanvas)); fCanvas.backgroundColor = '#f9f9f9'; fCanvas.renderAll(); block.querySelector('.hint-text').style.display = 'block'; }
+        if (fCanvas) { fCanvas.clear(); fCanvas.setBackgroundImage(null, fCanvas.renderAll.bind(fCanvas)); fCanvas.renderAll(); }
     }
 
     function setFocus(canvas) {
@@ -266,7 +273,7 @@
             signature: JSON.stringify(sigCanvas.toJSON())
         };
         localStorage.setItem('recce_draft', JSON.stringify(data));
-        alert("Progress saved to browser memory.");
+        alert("Draft Saved.");
     }
 
     function loadDraft() {
@@ -282,7 +289,7 @@
             data.canvases.forEach((json, idx) => { if (canvases[idx]) canvases[idx].loadFromJSON(json, canvases[idx].renderAll.bind(canvases[idx])); });
             if (sigCanvas) sigCanvas.loadFromJSON(data.signature, sigCanvas.renderAll.bind(sigCanvas));
             syncFields(document.getElementById('v-name').value);
-        }, 500);
+        }, 800);
     }
 </script>
 </body>
