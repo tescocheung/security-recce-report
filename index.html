@@ -7,14 +7,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     
     <style>
-        /* A4 Precision - Hard 294mm height to prevent ghosting */
+        /* Modernized Print CSS */
         @page { size: A4; margin: 0; }
-        * { box-sizing: border-box; -webkit-print-color-adjust: exact; }
+        * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background: #34495e; color: #333; }
 
         .page {
             width: 210mm; 
-            height: 294mm; 
+            min-height: 297mm; /* Changed to min-height for better A4 scaling */
             padding: 12mm 18mm; 
             margin: 10mm auto;
             background: white;
@@ -24,9 +24,9 @@
             page-break-after: always;
             overflow: hidden;
             border: 1px solid #ddd;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        /* Logic to stop the extra blank page at the end */
         .page:last-child { page-break-after: auto !important; }
 
         .controls-menu { 
@@ -36,9 +36,10 @@
         }
         .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
         .tool-btn { padding: 8px; border: 1px solid #ddd; background: #f8f9fa; cursor: pointer; font-size: 11px; text-align: center; border-radius: 4px; font-weight: bold; }
-        .dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid white; display: inline-block; margin-right: 5px; }
-        .dot.active { border-color: #333; transform: scale(1.1); }
-        .btn-main { width: 100%; padding: 12px; margin-bottom: 6px; cursor: pointer; font-weight: bold; border: none; border-radius: 4px; color: white; }
+        .dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid white; display: inline-block; margin-right: 5px; transition: transform 0.2s; }
+        .dot.active { border-color: #333; transform: scale(1.2); }
+        .btn-main { width: 100%; padding: 12px; margin-bottom: 6px; cursor: pointer; font-weight: bold; border: none; border-radius: 4px; color: white; transition: opacity 0.2s;}
+        .btn-main:hover { opacity: 0.9; }
 
         .header { font-size: 10px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; display: flex; justify-content: space-between; font-weight: bold; }
         .footer { 
@@ -47,14 +48,14 @@
             display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center;
         }
         .footer .center-warn { text-align: center; font-weight: bold; color: #000; text-transform: uppercase; }
-        
+        .right-pg { text-align: right; }
         .data-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
         .data-table td { border: 2.5px solid #000; padding: 10px; font-size: 13px; vertical-align: top; }
         .label { background: #f2f2f2; width: 35%; font-weight: bold; }
 
         .photo-block { flex: 1; display: flex; flex-direction: column; margin-bottom: 8px; position: relative; }
-        .canvas-wrapper { border: 2.5px solid #000; background: #fafafa; width: 100%; height: 75mm; overflow: hidden; position: relative; }
-        .canvas-wrapper.active-photo { border-color: #3498db; }
+        .canvas-wrapper { border: 2.5px solid #000; background: #fafafa; width: 100%; height: 75mm; position: relative; }
+        .canvas-wrapper.active-photo { border-color: #3498db; box-shadow: 0 0 8px rgba(52, 152, 219, 0.5); }
         
         input, select, textarea { width: 100%; border: 2px solid #000; padding: 8px; font-size: 13px; outline: none; margin-top: 2px; }
         textarea { height: 25mm; resize: none; }
@@ -67,7 +68,7 @@
 
         @media print { 
             body { background: white; }
-            .page { margin: 0; border: none; box-shadow: none; width: 210mm; height: 294mm; padding: 12mm 18mm; }
+            .page { margin: 0; border: none; box-shadow: none; width: 210mm; min-height: 297mm; padding: 12mm 18mm; }
             .no-print, .controls-menu { display: none !important; } 
             input, textarea { border: 2px solid #000 !important; }
         }
@@ -116,23 +117,23 @@
             <tr><td class="label">LEAD OFFICER</td><td><input type="text" placeholder="Example: Name" class="save-input"></td></tr>
             <tr><td class="label">DATE OF VISIT</td><td><input type="date" class="save-input"></td></tr>
         </table>
-        <div class="footer"><span>VENUE: <span class="f-v">---</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL - AUTHORIZED ACCESS ONLY</span><span class="right-pg">PAGE 1</span></div>
+        <div class="footer"><span>VENUE: <span class="f-v">---</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL</span><span class="right-pg">PAGE 1</span></div>
     </div>
 
     <div class="page">
         <div class="header"><span>ID: <span class="id-txt">---</span></span><span>LOGISTICS</span></div>
         <table class="data-table">
             <tr><td class="label">ADDRESS</td><td><textarea placeholder="Example: 19 Island Rd, Deep Water Bay" class="save-input"></textarea></td></tr>
-            <tr><td class="label">CONTACT PERSON</td><td><input type="text" placeholder="Example: Alan Tam" class="save-input"></td></tr>
+            <tr><td class="label">CONTACT PERSON</td><td><input type="text" placeholder="Example: Name" class="save-input"></td></tr>
             <tr><td class="label">PHONE NUMBER</td><td><input type="tel" placeholder="Example: +852 1234 5678" class="save-input"></td></tr>
-            <tr><td class="label">PURPOSE OF VISIT</td><td><textarea style="height:100px;" placeholder="Example: Golf, school, appointment" class="save-input"></textarea></td></tr>
+            <tr><td class="label">PURPOSE OF VISIT</td><td><textarea style="height:100px;" placeholder="Example: Golf, Work, School, Appointment" class="save-input"></textarea></td></tr>
         </table>
         <div class="sig-container">
-            <div class="no-print" style="text-align:right;"><button style="background:#e67e22; color:white; border:none; padding:4px; font-size:10px;" onclick="clearSignature()">CLEAR SIG</button></div>
+            <div class="no-print" style="text-align:right;"><button style="background:#e67e22; color:white; border:none; padding:4px; font-size:10px; cursor: pointer;" onclick="clearSignature()">CLEAR SIG</button></div>
             <div class="sig-box"><canvas id="sig-canvas"></canvas></div>
             <div style="font-size: 11px; font-weight: bold; margin-top: 5px; text-align: center; border-top: 1px solid #000;">REVIEWER SIGNATURE</div>
         </div>
-        <div class="footer"><span>VENUE: <span class="f-v">---</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL - AUTHORIZED ACCESS ONLY</span><span class="right-pg">PAGE 2</span></div>
+        <div class="footer"><span>VENUE: <span class="f-v">---</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL</span><span class="right-pg">PAGE 2</span></div>
     </div>
     <div id="dynamic-container"></div>
 </div>
@@ -144,7 +145,8 @@
     new QRCode(document.getElementById("qrcode"), { text: driveSearchURL, width: 130, height: 130 });
 
     let activeColor = '#FF0000';
-    let canvases = [];
+    // Dictionary instead of an array to easily target specific canvases by ID
+    let canvasRegistry = {}; 
     let focusedCanvas = null;
     let sigCanvas = null;
 
@@ -157,12 +159,13 @@
 
     function triggerFullSyncPrint() {
         document.title = reportID;
-        canvases.forEach(c => { c.discardActiveObject(); c.renderAll(); });
+        Object.values(canvasRegistry).forEach(c => { c.discardActiveObject(); c.renderAll(); });
         if(sigCanvas) { sigCanvas.discardActiveObject(); sigCanvas.renderAll(); }
         window.print();
     }
 
     function clearSignature() { if (sigCanvas) { sigCanvas.clear(); sigCanvas.backgroundColor = '#fff'; sigCanvas.renderAll(); } }
+    
     function handleColorClick(color, el) {
         activeColor = color;
         document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
@@ -176,23 +179,46 @@
     function syncFields(val) { document.querySelectorAll('.f-v').forEach(e => e.innerText = val || "---"); }
     function toggleOS(v) { document.getElementById('os-box').style.display = (v === 'OS' ? 'block' : 'none'); }
 
+    function generateId() { return 'canvas_' + Math.random().toString(36).substr(2, 9); }
+
     function addNewPage() {
         const parent = document.getElementById('dynamic-container');
         const v = document.getElementById('v-name').value || "---";
         const pageDiv = document.createElement('div');
         pageDiv.className = 'page dynamic-page photo-page';
         const pageNum = document.querySelectorAll('.page').length + 1;
+        
+        const id1 = generateId();
+        const id2 = generateId();
+
         pageDiv.innerHTML = `
-            <div class="header"><span>ID: ${reportID}</span><button class="no-print" style="background:red; color:white; border:none; padding:4px; font-size:9px;" onclick="this.closest('.page').remove()">REMOVE</button></div>
-            ${photoBlock(1)}${photoBlock(2)}
+            <div class="header"><span>ID: ${reportID}</span><button class="no-print" style="background:red; color:white; border:none; padding:4px; font-size:9px; cursor: pointer;" onclick="removePage(this, ['${id1}', '${id2}'])">REMOVE</button></div>
+            ${photoBlock(1, id1)}
+            ${photoBlock(2, id2)}
             <div class="footer"><span>VENUE: <span class="f-v">${v}</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL</span><span class="right-pg">PAGE ${pageNum}</span></div>
         `;
         parent.appendChild(pageDiv);
-        pageDiv.querySelectorAll('.f-canvas').forEach(canvasEl => {
+
+        // Safely initialize based on specific IDs
+        [id1, id2].forEach(id => {
+            const canvasEl = document.getElementById(id);
             const fCanvas = new fabric.Canvas(canvasEl, { width: 640, height: 280, backgroundColor: '#f9f9f9' });
-            canvases.push(fCanvas);
-            fCanvas.on('mouse:down', () => setFocus(fCanvas));
+            canvasRegistry[id] = fCanvas;
+            fCanvas.on('mouse:down', () => setFocus(fCanvas, id));
         });
+    }
+
+    function removePage(btn, canvasIds) {
+        canvasIds.forEach(id => {
+            if(canvasRegistry[id]) {
+                canvasRegistry[id].dispose(); // Free up memory
+                delete canvasRegistry[id];
+            }
+        });
+        btn.closest('.page').remove();
+        if(focusedCanvas && !Object.values(canvasRegistry).includes(focusedCanvas)) {
+            focusedCanvas = null;
+        }
     }
 
     function addNewNotePage() {
@@ -202,28 +228,30 @@
         pageDiv.className = 'page dynamic-page note-page';
         const pageNum = document.querySelectorAll('.page').length + 1;
         pageDiv.innerHTML = `
-            <div class="header"><span>ID: ${reportID}</span><button class="no-print" style="background:red; color:white; border:none; padding:4px; font-size:9px;" onclick="this.closest('.page').remove()">REMOVE</button></div>
+            <div class="header"><span>ID: ${reportID}</span><button class="no-print" style="background:red; color:white; border:none; padding:4px; font-size:9px; cursor: pointer;" onclick="this.closest('.page').remove()">REMOVE</button></div>
             <div class="note-area"><strong>ADDITIONAL NOTES</strong><textarea class="save-input"></textarea></div>
             <div class="footer"><span>VENUE: <span class="f-v">${v}</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL</span><span class="right-pg">PAGE ${pageNum}</span></div>
         `;
         parent.appendChild(pageDiv);
     }
 
-    function photoBlock(num) {
+    function photoBlock(num, canvasId) {
         return `
-            <div class="photo-block">
+            <div class="photo-block" data-target="${canvasId}">
                 <div class="no-print" style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                    <input type="file" style="width:70%; border:none;" onchange="handleImage(this)"><button style="background:#e67e22; color:white; border:none; padding:2px 6px; font-size:10px;" onclick="clearPhoto(this)">CLEAR</button>
+                    <input type="file" style="width:70%; border:none;" onchange="handleImage(this, '${canvasId}')">
+                    <button style="background:#e67e22; color:white; border:none; padding:2px 6px; font-size:10px; cursor: pointer;" onclick="clearPhoto('${canvasId}')">CLEAR</button>
                 </div>
-                <div class="canvas-wrapper"><canvas class="f-canvas"></canvas></div>
+                <div class="canvas-wrapper" id="wrapper_${canvasId}"><canvas id="${canvasId}"></canvas></div>
                 <textarea class="save-input" placeholder="Notes for Photo ${num}"></textarea>
             </div>
         `;
     }
 
-    function handleImage(input) {
-        const wrapper = input.closest('.photo-block').querySelector('.canvas-wrapper');
-        const fCanvas = canvases.find(c => c.getElement() === wrapper.querySelector('canvas'));
+    function handleImage(input, canvasId) {
+        const fCanvas = canvasRegistry[canvasId];
+        if (!fCanvas) return;
+        
         const reader = new FileReader();
         reader.onload = (f) => {
             fabric.Image.fromURL(f.target.result, (img) => {
@@ -232,62 +260,94 @@
                     scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fCanvas.width / 2, top: fCanvas.height / 2,
                     selectable: false, evented: false
                 });
-                setFocus(fCanvas);
+                setFocus(fCanvas, canvasId);
             });
         };
-        reader.readAsDataURL(input.files[0]);
+        if(input.files[0]) reader.readAsDataURL(input.files[0]);
     }
 
-    function clearPhoto(btn) {
-        const block = btn.closest('.photo-block');
-        const fCanvas = canvases.find(c => c.getElement() === block.querySelector('canvas'));
+    function clearPhoto(canvasId) {
+        const fCanvas = canvasRegistry[canvasId];
         if (fCanvas) { fCanvas.clear(); fCanvas.setBackgroundImage(null, fCanvas.renderAll.bind(fCanvas)); fCanvas.renderAll(); }
     }
 
-    function setFocus(canvas) {
+    function setFocus(canvas, canvasId) {
         focusedCanvas = canvas;
         document.querySelectorAll('.canvas-wrapper').forEach(w => w.classList.remove('active-photo'));
-        canvas.wrapperEl.closest('.canvas-wrapper').classList.add('active-photo');
+        const wrapper = document.getElementById('wrapper_' + canvasId);
+        if(wrapper) wrapper.classList.add('active-photo');
     }
 
     function addShape(type) {
-        if (!focusedCanvas) return;
+        if (!focusedCanvas) return alert("Please click on a photo area first to select it.");
+        
         const props = { stroke: activeColor, strokeWidth: 4, fill: 'transparent', left: 50, top: 50 };
         let obj;
+        
         if (type === 'circle') obj = new fabric.Circle({ ...props, radius: 40 });
         if (type === 'rect') obj = new fabric.Rect({ ...props, width: 80, height: 60 });
         if (type === 'line') obj = new fabric.Line([0, 0, 100, 0], { ...props });
-        if (type === 'arrow') obj = new fabric.Path('M 0 0 L 50 0 M 50 0 L 40 -10 M 50 0 L 40 10', { ...props, scaleX: 1.5, scaleY: 1.5 });
-        focusedCanvas.add(obj); focusedCanvas.setActiveObject(obj);
+        
+        if (type === 'arrow') {
+            // Better arrow implementation using group
+            const line = new fabric.Line([0, 0, 80, 0], { stroke: activeColor, strokeWidth: 4 });
+            const triangle = new fabric.Triangle({ width: 15, height: 15, fill: activeColor, left: 80, top: 0, originX: 'center', originY: 'center', angle: 90 });
+            obj = new fabric.Group([line, triangle], { left: 50, top: 50 });
+        }
+
+        focusedCanvas.add(obj); 
+        focusedCanvas.setActiveObject(obj);
     }
 
-    function deleteSelected() { if (focusedCanvas) { const active = focusedCanvas.getActiveObjects(); if (active.length) { focusedCanvas.discardActiveObject(); focusedCanvas.remove(...active); } } }
+    function deleteSelected() { 
+        if (focusedCanvas) { 
+            const active = focusedCanvas.getActiveObjects(); 
+            if (active.length) { focusedCanvas.discardActiveObject(); focusedCanvas.remove(...active); } 
+        } 
+    }
 
     function saveDraft() {
         const data = {
             inputs: Array.from(document.querySelectorAll('.save-input')).map(i => i.value),
             pages: Array.from(document.querySelectorAll('.dynamic-page')).map(p => p.classList.contains('photo-page') ? 'photo' : 'note'),
-            canvases: canvases.map(c => JSON.stringify(c.toJSON())),
+            // Save the registry by its keys to maintain order
+            canvases: Object.values(canvasRegistry).map(c => JSON.stringify(c.toJSON())),
             signature: JSON.stringify(sigCanvas.toJSON())
         };
         localStorage.setItem('recce_draft', JSON.stringify(data));
-        alert("Draft Saved.");
+        alert("Draft Saved Successfully.");
     }
 
     function loadDraft() {
         const raw = localStorage.getItem('recce_draft');
         if (!raw) return alert("No draft found.");
         const data = JSON.parse(raw);
+        
+        // Memory Cleanup
+        Object.values(canvasRegistry).forEach(c => c.dispose());
+        canvasRegistry = {};
+        
         document.getElementById('dynamic-container').innerHTML = '';
-        canvases = [];
+        
+        // Synchronous rebuilding
         data.pages.forEach(type => type === 'photo' ? addNewPage() : addNewNotePage());
-        setTimeout(() => {
-            const inputs = document.querySelectorAll('.save-input');
-            data.inputs.forEach((val, idx) => { if (inputs[idx]) inputs[idx].value = val; });
-            data.canvases.forEach((json, idx) => { if (canvases[idx]) canvases[idx].loadFromJSON(json, canvases[idx].renderAll.bind(canvases[idx])); });
-            if (sigCanvas) sigCanvas.loadFromJSON(data.signature, sigCanvas.renderAll.bind(sigCanvas));
-            syncFields(document.getElementById('v-name').value);
-        }, 800);
+        
+        // DOM is updated synchronously, no timeout needed
+        const inputs = document.querySelectorAll('.save-input');
+        data.inputs.forEach((val, idx) => { if (inputs[idx]) inputs[idx].value = val; });
+        
+        const canvasInstances = Object.values(canvasRegistry);
+        data.canvases.forEach((json, idx) => { 
+            if (canvasInstances[idx]) {
+                canvasInstances[idx].loadFromJSON(json, canvasInstances[idx].renderAll.bind(canvasInstances[idx])); 
+            }
+        });
+        
+        if (sigCanvas && data.signature) {
+            sigCanvas.loadFromJSON(data.signature, sigCanvas.renderAll.bind(sigCanvas));
+        }
+        
+        syncFields(document.getElementById('v-name').value);
     }
 </script>
 </body>
