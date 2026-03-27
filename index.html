@@ -7,75 +7,41 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     
     <style>
-        /* Modernized Print CSS */
         @page { size: A4; margin: 0; }
         * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background: #34495e; color: #333; }
-
-        .page {
-            width: 210mm; 
-            min-height: 297mm; /* Changed to min-height for better A4 scaling */
-            padding: 12mm 18mm; 
-            margin: 10mm auto;
-            background: white;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            page-break-after: always;
-            overflow: hidden;
-            border: 1px solid #ddd;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
+        .page { width: 210mm; min-height: 297mm; padding: 12mm 18mm 24mm; margin: 10mm auto; background: white; position: relative; display: flex; flex-direction: column; page-break-after: always; overflow: hidden; border: 1px solid #ddd; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .page:last-child { page-break-after: auto !important; }
-
-        .controls-menu { 
-            position: fixed; top: 10px; left: 10px; z-index: 9999; 
-            background: #fff; padding: 12px; border-radius: 8px; width: 210px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        }
+        .controls-menu { position: fixed; top: 10px; left: 10px; z-index: 9999; background: #fff; padding: 12px; border-radius: 8px; width: 210px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
         .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
         .tool-btn { padding: 8px; border: 1px solid #ddd; background: #f8f9fa; cursor: pointer; font-size: 11px; text-align: center; border-radius: 4px; font-weight: bold; }
         .dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid white; display: inline-block; margin-right: 5px; transition: transform 0.2s; }
         .dot.active { border-color: #333; transform: scale(1.2); }
         .btn-main { width: 100%; padding: 12px; margin-bottom: 6px; cursor: pointer; font-weight: bold; border: none; border-radius: 4px; color: white; transition: opacity 0.2s;}
         .btn-main:hover { opacity: 0.9; }
-
         .header { font-size: 10px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; display: flex; justify-content: space-between; font-weight: bold; }
-        .footer { 
-            position: absolute; bottom: 8mm; left: 18mm; right: 18mm; 
-            font-size: 9px; border-top: 1px solid #ccc; padding-top: 5px; 
-            display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center;
-        }
+        .footer { position: absolute; bottom: 8mm; left: 18mm; right: 18mm; font-size: 9px; border-top: 1px solid #ccc; padding-top: 5px; display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center; }
         .footer .center-warn { text-align: center; font-weight: bold; color: #000; text-transform: uppercase; }
         .right-pg { text-align: right; }
         .data-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
         .data-table td { border: 2.5px solid #000; padding: 10px; font-size: 13px; vertical-align: top; }
         .label { background: #f2f2f2; width: 35%; font-weight: bold; }
-
         .photo-block { flex: 1; display: flex; flex-direction: column; margin-bottom: 8px; position: relative; }
-        .canvas-wrapper { border: 2.5px solid #000; background: #fafafa; width: 100%; height: 75mm; position: relative; }
-        .canvas-wrapper.active-photo { border-color: #3498db; box-shadow: 0 0 8px rgba(52, 152, 219, 0.5); }
-        
+        .canvas-wrapper { background: #fafafa; width: 100%; height: 75mm; position: relative; overflow: hidden; }
+        .canvas-wrapper::after { content: ""; position: absolute; inset: 0; border: 2px solid #000; pointer-events: none; z-index: 3; }
+        .canvas-wrapper canvas { display: block; width: 100% !important; height: 100% !important; }
+        .canvas-wrapper.active-photo { box-shadow: 0 0 8px rgba(52, 152, 219, 0.5); }
+        .canvas-wrapper.active-photo::after { border-color: #3498db; }
         input, select, textarea { width: 100%; border: 2px solid #000; padding: 8px; font-size: 13px; outline: none; margin-top: 2px; }
         textarea { height: 25mm; resize: none; }
-
         .note-area { flex: 1; margin: 10px 0; display: flex; flex-direction: column; }
         .note-area textarea { flex: 1; height: auto; min-height: 150mm; }
-
         .sig-container { align-self: flex-end; width: 70mm; margin-top: 5px; margin-bottom: 25px; }
         .sig-box { border: 2px dashed #000; background: #fff; height: 32mm; width: 100%; }
-
-        @media print { 
-            body { background: white; }
-            .page { margin: 0; border: none; box-shadow: none; width: 210mm; min-height: 297mm; padding: 12mm 18mm; }
-            .no-print, .controls-menu { display: none !important; } 
-            input, textarea { border: 2px solid #000 !important; }
-        }
+        @media print { body { background: white; } .page { margin: 0; border: none; box-shadow: none; width: 210mm; min-height: 297mm; padding: 12mm 18mm 24mm; } .no-print, .controls-menu { display: none !important; } input, textarea { border: 2px solid #000 !important; } }
     </style>
 </head>
 <body>
-
 <div class="controls-menu no-print">
     <div style="font-size: 11px; font-weight: bold; margin-bottom: 6px;">1. ICON COLOR</div>
     <div style="margin-bottom: 10px;">
@@ -97,7 +63,6 @@
     <button class="btn-main" style="background: #e74c3c;" onclick="loadDraft()">RECOVER DRAFT</button>
     <button class="btn-main" id="save-btn" style="background: #2980b9;" onclick="triggerFullSyncPrint()">SAVE PDF</button>
 </div>
-
 <div id="capture-zone">
     <div class="page">
         <div class="header"><span>RECCE ID: <span class="id-txt">---</span></span><span>CONFIDENTIAL</span></div>
@@ -108,18 +73,12 @@
         </div>
         <table class="data-table">
             <tr><td class="label">VENUE NAME</td><td><input type="text" id="v-name" oninput="syncFields(this.value)" placeholder="Example: Hong Kong Golf Club" class="save-input"></td></tr>
-            <tr><td class="label">REGION</td><td>
-                <select id="reg-sel" onchange="toggleOS(this.value)" class="save-input">
-                    <option>HONG KONG ISLAND</option><option>KOWLOON</option><option>NEW TERRITORIES</option><option value="OS">OVERSEAS</option>
-                </select>
-                <div id="os-box" style="display:none; margin-top:5px;">COUNTRY: <input type="text" placeholder="Example: Singapore" class="save-input"></div>
-            </td></tr>
+            <tr><td class="label">REGION</td><td><select id="reg-sel" onchange="toggleOS(this.value)" class="save-input"><option>HONG KONG ISLAND</option><option>KOWLOON</option><option>NEW TERRITORIES</option><option value="OS">OVERSEAS</option></select><div id="os-box" style="display:none; margin-top:5px;">COUNTRY: <input type="text" placeholder="Example: Singapore" class="save-input"></div></td></tr>
             <tr><td class="label">LEAD OFFICER</td><td><input type="text" placeholder="Example: Name" class="save-input"></td></tr>
             <tr><td class="label">DATE OF VISIT</td><td><input type="date" class="save-input"></td></tr>
         </table>
         <div class="footer"><span>VENUE: <span class="f-v">---</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL</span><span class="right-pg">PAGE 1</span></div>
     </div>
-
     <div class="page">
         <div class="header"><span>ID: <span class="id-txt">---</span></span><span>LOGISTICS</span></div>
         <table class="data-table">
@@ -137,102 +96,48 @@
     </div>
     <div id="dynamic-container"></div>
 </div>
-
 <script>
     const reportID = "REC-" + Math.floor(100000 + Math.random() * 900000);
-    document.querySelectorAll('.id-txt').forEach(e => e.innerText = reportID);
+    document.querySelectorAll(".id-txt").forEach(e => e.innerText = reportID);
     const driveSearchURL = `https://drive.google.com/drive/search?q=${reportID}`;
     new QRCode(document.getElementById("qrcode"), { text: driveSearchURL, width: 130, height: 130 });
 
-    let activeColor = '#FF0000';
-    // Dictionary instead of an array to easily target specific canvases by ID
-    let canvasRegistry = {}; 
+    let activeColor = "#FF0000";
+    let canvasRegistry = {};
     let focusedCanvas = null;
     let sigCanvas = null;
 
-    window.onload = () => {
-        const el = document.getElementById('sig-canvas');
-        sigCanvas = new fabric.Canvas(el, { width: 260, height: 115, isDrawingMode: true, backgroundColor: '#fff' });
-        sigCanvas.freeDrawingBrush.color = "#000";
-        sigCanvas.freeDrawingBrush.width = 2;
-    };
-
-    function triggerFullSyncPrint() {
-        document.title = reportID;
-        Object.values(canvasRegistry).forEach(c => { c.discardActiveObject(); c.renderAll(); });
-        if(sigCanvas) { sigCanvas.discardActiveObject(); sigCanvas.renderAll(); }
-        window.print();
+    function generateId(prefix) {
+        return `${prefix}_${Math.random().toString(36).slice(2, 11)}`;
     }
 
-    function clearSignature() { if (sigCanvas) { sigCanvas.clear(); sigCanvas.backgroundColor = '#fff'; sigCanvas.renderAll(); } }
-    
-    function handleColorClick(color, el) {
-        activeColor = color;
-        document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
-        el.classList.add('active');
-        if (focusedCanvas) {
-            const obj = focusedCanvas.getActiveObject();
-            if (obj) { obj.set('stroke', activeColor); focusedCanvas.renderAll(); }
-        }
-    }
-
-    function syncFields(val) { document.querySelectorAll('.f-v').forEach(e => e.innerText = val || "---"); }
-    function toggleOS(v) { document.getElementById('os-box').style.display = (v === 'OS' ? 'block' : 'none'); }
-
-    function generateId() { return 'canvas_' + Math.random().toString(36).substr(2, 9); }
-
-    function addNewPage() {
-        const parent = document.getElementById('dynamic-container');
-        const v = document.getElementById('v-name').value || "---";
-        const pageDiv = document.createElement('div');
-        pageDiv.className = 'page dynamic-page photo-page';
-        const pageNum = document.querySelectorAll('.page').length + 1;
-        
-        const id1 = generateId();
-        const id2 = generateId();
-
-        pageDiv.innerHTML = `
-            <div class="header"><span>ID: ${reportID}</span><button class="no-print" style="background:red; color:white; border:none; padding:4px; font-size:9px; cursor: pointer;" onclick="removePage(this, ['${id1}', '${id2}'])">REMOVE</button></div>
-            ${photoBlock(1, id1)}
-            ${photoBlock(2, id2)}
-            <div class="footer"><span>VENUE: <span class="f-v">${v}</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL</span><span class="right-pg">PAGE ${pageNum}</span></div>
-        `;
-        parent.appendChild(pageDiv);
-
-        // Safely initialize based on specific IDs
-        [id1, id2].forEach(id => {
-            const canvasEl = document.getElementById(id);
-            const fCanvas = new fabric.Canvas(canvasEl, { width: 640, height: 280, backgroundColor: '#f9f9f9' });
-            canvasRegistry[id] = fCanvas;
-            fCanvas.on('mouse:down', () => setFocus(fCanvas, id));
+    function updatePageNumbers() {
+        document.querySelectorAll(".page .right-pg").forEach((el, idx) => {
+            el.innerText = `PAGE ${idx + 1}`;
         });
     }
 
-    function removePage(btn, canvasIds) {
-        canvasIds.forEach(id => {
-            if(canvasRegistry[id]) {
-                canvasRegistry[id].dispose(); // Free up memory
-                delete canvasRegistry[id];
-            }
-        });
-        btn.closest('.page').remove();
-        if(focusedCanvas && !Object.values(canvasRegistry).includes(focusedCanvas)) {
-            focusedCanvas = null;
-        }
+    function updateFocusHighlight(canvasId) {
+        document.querySelectorAll(".canvas-wrapper").forEach(w => w.classList.remove("active-photo"));
+        const wrapper = document.getElementById(`wrapper_${canvasId}`);
+        if (wrapper) wrapper.classList.add("active-photo");
     }
 
-    function addNewNotePage() {
-        const parent = document.getElementById('dynamic-container');
-        const v = document.getElementById('v-name').value || "---";
-        const pageDiv = document.createElement('div');
-        pageDiv.className = 'page dynamic-page note-page';
-        const pageNum = document.querySelectorAll('.page').length + 1;
-        pageDiv.innerHTML = `
-            <div class="header"><span>ID: ${reportID}</span><button class="no-print" style="background:red; color:white; border:none; padding:4px; font-size:9px; cursor: pointer;" onclick="this.closest('.page').remove()">REMOVE</button></div>
-            <div class="note-area"><strong>ADDITIONAL NOTES</strong><textarea class="save-input"></textarea></div>
-            <div class="footer"><span>VENUE: <span class="f-v">${v}</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL</span><span class="right-pg">PAGE ${pageNum}</span></div>
-        `;
-        parent.appendChild(pageDiv);
+    function registerCanvas(canvasId) {
+        const canvasEl = document.getElementById(canvasId);
+        if (!canvasEl) return null;
+        const fCanvas = new fabric.Canvas(canvasEl, {
+            width: 640,
+            height: 280,
+            backgroundColor: "#f9f9f9",
+            preserveObjectStacking: true
+        });
+        canvasRegistry[canvasId] = fCanvas;
+        fCanvas.on("mouse:down", () => {
+            focusedCanvas = fCanvas;
+            updateFocusHighlight(canvasId);
+        });
+        return fCanvas;
     }
 
     function photoBlock(num, canvasId) {
@@ -248,107 +153,270 @@
         `;
     }
 
+    function addNewPage(canvasIds) {
+        const ids = Array.isArray(canvasIds) && canvasIds.length === 2
+            ? canvasIds
+            : [generateId("canvas"), generateId("canvas")];
+        const parent = document.getElementById("dynamic-container");
+        const v = document.getElementById("v-name").value || "---";
+        const pageDiv = document.createElement("div");
+        pageDiv.className = "page dynamic-page photo-page";
+        pageDiv.dataset.canvasIds = ids.join(",");
+        pageDiv.innerHTML = `
+            <div class="header">
+                <span>ID: ${reportID}</span>
+                <button class="no-print" style="background:red; color:white; border:none; padding:4px; font-size:9px; cursor: pointer;" onclick="removePage(this)">REMOVE</button>
+            </div>
+            ${photoBlock(1, ids[0])}
+            ${photoBlock(2, ids[1])}
+            <div class="footer"><span>VENUE: <span class="f-v">${v}</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL</span><span class="right-pg"></span></div>
+        `;
+        parent.appendChild(pageDiv);
+        ids.forEach(registerCanvas);
+        updatePageNumbers();
+    }
+
+    function addNewNotePage() {
+        const parent = document.getElementById("dynamic-container");
+        const v = document.getElementById("v-name").value || "---";
+        const pageDiv = document.createElement("div");
+        pageDiv.className = "page dynamic-page note-page";
+        pageDiv.innerHTML = `
+            <div class="header">
+                <span>ID: ${reportID}</span>
+                <button class="no-print" style="background:red; color:white; border:none; padding:4px; font-size:9px; cursor: pointer;" onclick="removePage(this)">REMOVE</button>
+            </div>
+            <div class="note-area"><strong>ADDITIONAL NOTES</strong><textarea class="save-input"></textarea></div>
+            <div class="footer"><span>VENUE: <span class="f-v">${v}</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL</span><span class="right-pg"></span></div>
+        `;
+        parent.appendChild(pageDiv);
+        updatePageNumbers();
+    }
+
+    function removePage(btn) {
+        const page = btn.closest(".page");
+        if (!page) return;
+        const canvasIds = (page.dataset.canvasIds || "").split(",").filter(Boolean);
+        canvasIds.forEach(id => {
+            if (canvasRegistry[id]) {
+                canvasRegistry[id].dispose();
+                delete canvasRegistry[id];
+            }
+        });
+        page.remove();
+        if (focusedCanvas && !Object.values(canvasRegistry).includes(focusedCanvas)) {
+            focusedCanvas = null;
+            document.querySelectorAll(".canvas-wrapper").forEach(w => w.classList.remove("active-photo"));
+        }
+        updatePageNumbers();
+    }
+
     function handleImage(input, canvasId) {
         const fCanvas = canvasRegistry[canvasId];
-        if (!fCanvas) return;
-        
+        if (!fCanvas || !input.files || !input.files[0]) return;
         const reader = new FileReader();
         reader.onload = (f) => {
             fabric.Image.fromURL(f.target.result, (img) => {
                 const scale = Math.min(fCanvas.width / img.width, fCanvas.height / img.height);
-                fCanvas.setBackgroundImage(img, fCanvas.renderAll.bind(fCanvas), { 
-                    scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fCanvas.width / 2, top: fCanvas.height / 2,
-                    selectable: false, evented: false
+                fCanvas.setBackgroundImage(img, fCanvas.renderAll.bind(fCanvas), {
+                    scaleX: scale,
+                    scaleY: scale,
+                    originX: "center",
+                    originY: "center",
+                    left: fCanvas.width / 2,
+                    top: fCanvas.height / 2,
+                    selectable: false,
+                    evented: false
                 });
-                setFocus(fCanvas, canvasId);
+                focusedCanvas = fCanvas;
+                updateFocusHighlight(canvasId);
             });
         };
-        if(input.files[0]) reader.readAsDataURL(input.files[0]);
+        reader.readAsDataURL(input.files[0]);
     }
 
     function clearPhoto(canvasId) {
         const fCanvas = canvasRegistry[canvasId];
-        if (fCanvas) { fCanvas.clear(); fCanvas.setBackgroundImage(null, fCanvas.renderAll.bind(fCanvas)); fCanvas.renderAll(); }
+        if (!fCanvas) return;
+        fCanvas.getObjects().forEach(obj => fCanvas.remove(obj));
+        fCanvas.setBackgroundImage(null, fCanvas.renderAll.bind(fCanvas));
+        fCanvas.renderAll();
     }
 
-    function setFocus(canvas, canvasId) {
-        focusedCanvas = canvas;
-        document.querySelectorAll('.canvas-wrapper').forEach(w => w.classList.remove('active-photo'));
-        const wrapper = document.getElementById('wrapper_' + canvasId);
-        if(wrapper) wrapper.classList.add('active-photo');
+    function clearSignature() {
+        if (!sigCanvas) return;
+        sigCanvas.clear();
+        sigCanvas.backgroundColor = "#fff";
+        sigCanvas.renderAll();
+    }
+
+    function handleColorClick(color, el) {
+        activeColor = color;
+        document.querySelectorAll(".dot").forEach(d => d.classList.remove("active"));
+        el.classList.add("active");
+        if (!focusedCanvas) return;
+        const obj = focusedCanvas.getActiveObject();
+        if (!obj) return;
+        if (obj.type === "group") {
+            obj.getObjects().forEach(child => {
+                if ("stroke" in child) child.set("stroke", activeColor);
+                if (child.type === "triangle") child.set("fill", activeColor);
+            });
+        } else {
+            obj.set("stroke", activeColor);
+        }
+        focusedCanvas.renderAll();
     }
 
     function addShape(type) {
-        if (!focusedCanvas) return alert("Please click on a photo area first to select it.");
-        
-        const props = { stroke: activeColor, strokeWidth: 4, fill: 'transparent', left: 50, top: 50 };
-        let obj;
-        
-        if (type === 'circle') obj = new fabric.Circle({ ...props, radius: 40 });
-        if (type === 'rect') obj = new fabric.Rect({ ...props, width: 80, height: 60 });
-        if (type === 'line') obj = new fabric.Line([0, 0, 100, 0], { ...props });
-        
-        if (type === 'arrow') {
-            // Better arrow implementation using group
+        if (!focusedCanvas) {
+            alert("Please click on a photo area first to select it.");
+            return;
+        }
+
+        const props = { stroke: activeColor, strokeWidth: 4, fill: "transparent", left: 50, top: 50 };
+        let obj = null;
+
+        if (type === "circle") obj = new fabric.Circle({ ...props, radius: 40 });
+        if (type === "rect") obj = new fabric.Rect({ ...props, width: 80, height: 60 });
+        if (type === "line") obj = new fabric.Line([0, 0, 100, 0], { ...props });
+        if (type === "arrow") {
             const line = new fabric.Line([0, 0, 80, 0], { stroke: activeColor, strokeWidth: 4 });
-            const triangle = new fabric.Triangle({ width: 15, height: 15, fill: activeColor, left: 80, top: 0, originX: 'center', originY: 'center', angle: 90 });
+            const triangle = new fabric.Triangle({
+                width: 15,
+                height: 15,
+                fill: activeColor,
+                left: 80,
+                top: 0,
+                originX: "center",
+                originY: "center",
+                angle: 90
+            });
             obj = new fabric.Group([line, triangle], { left: 50, top: 50 });
         }
 
-        focusedCanvas.add(obj); 
+        if (!obj) return;
+        focusedCanvas.add(obj);
         focusedCanvas.setActiveObject(obj);
+        focusedCanvas.renderAll();
     }
 
-    function deleteSelected() { 
-        if (focusedCanvas) { 
-            const active = focusedCanvas.getActiveObjects(); 
-            if (active.length) { focusedCanvas.discardActiveObject(); focusedCanvas.remove(...active); } 
-        } 
+    function deleteSelected() {
+        if (!focusedCanvas) return;
+        const active = focusedCanvas.getActiveObjects();
+        if (!active.length) return;
+        focusedCanvas.discardActiveObject();
+        active.forEach(obj => focusedCanvas.remove(obj));
+        focusedCanvas.renderAll();
+    }
+
+    function syncFields(val) {
+        document.querySelectorAll(".f-v").forEach(e => e.innerText = val || "---");
+    }
+
+    function toggleOS(v) {
+        document.getElementById("os-box").style.display = (v === "OS" ? "block" : "none");
+    }
+
+    function triggerFullSyncPrint() {
+        document.title = reportID;
+        Object.values(canvasRegistry).forEach(c => {
+            c.discardActiveObject();
+            c.renderAll();
+        });
+        if (sigCanvas) {
+            sigCanvas.discardActiveObject();
+            sigCanvas.renderAll();
+        }
+        window.print();
     }
 
     function saveDraft() {
+        const pages = Array.from(document.querySelectorAll(".dynamic-page")).map(page => {
+            if (page.classList.contains("photo-page")) {
+                return { type: "photo", canvasIds: (page.dataset.canvasIds || "").split(",").filter(Boolean) };
+            }
+            return { type: "note" };
+        });
+
+        const canvases = pages
+            .filter(p => p.type === "photo")
+            .flatMap(p => p.canvasIds.map(id => ({ id, json: canvasRegistry[id] ? canvasRegistry[id].toJSON() : null })));
+
         const data = {
-            inputs: Array.from(document.querySelectorAll('.save-input')).map(i => i.value),
-            pages: Array.from(document.querySelectorAll('.dynamic-page')).map(p => p.classList.contains('photo-page') ? 'photo' : 'note'),
-            // Save the registry by its keys to maintain order
-            canvases: Object.values(canvasRegistry).map(c => JSON.stringify(c.toJSON())),
-            signature: JSON.stringify(sigCanvas.toJSON())
+            inputs: Array.from(document.querySelectorAll(".save-input")).map(i => i.value),
+            pages,
+            canvases,
+            signature: sigCanvas ? sigCanvas.toJSON() : null
         };
-        localStorage.setItem('recce_draft', JSON.stringify(data));
+
+        localStorage.setItem("recce_draft", JSON.stringify(data));
         alert("Draft Saved Successfully.");
     }
 
     function loadDraft() {
-        const raw = localStorage.getItem('recce_draft');
-        if (!raw) return alert("No draft found.");
-        const data = JSON.parse(raw);
-        
-        // Memory Cleanup
+        const raw = localStorage.getItem("recce_draft");
+        if (!raw) {
+            alert("No draft found.");
+            return;
+        }
+
+        let data = null;
+        try {
+            data = JSON.parse(raw);
+        } catch (err) {
+            alert("Draft is corrupted and cannot be loaded.");
+            return;
+        }
+
         Object.values(canvasRegistry).forEach(c => c.dispose());
         canvasRegistry = {};
-        
-        document.getElementById('dynamic-container').innerHTML = '';
-        
-        // Synchronous rebuilding
-        data.pages.forEach(type => type === 'photo' ? addNewPage() : addNewNotePage());
-        
-        // DOM is updated synchronously, no timeout needed
-        const inputs = document.querySelectorAll('.save-input');
-        data.inputs.forEach((val, idx) => { if (inputs[idx]) inputs[idx].value = val; });
-        
-        const canvasInstances = Object.values(canvasRegistry);
-        data.canvases.forEach((json, idx) => { 
-            if (canvasInstances[idx]) {
-                canvasInstances[idx].loadFromJSON(json, canvasInstances[idx].renderAll.bind(canvasInstances[idx])); 
+        focusedCanvas = null;
+        document.querySelectorAll(".canvas-wrapper").forEach(w => w.classList.remove("active-photo"));
+        document.getElementById("dynamic-container").innerHTML = "";
+
+        (data.pages || []).forEach(page => {
+            if (page.type === "photo") {
+                addNewPage(page.canvasIds);
+            } else {
+                addNewNotePage();
             }
         });
-        
-        if (sigCanvas && data.signature) {
-            sigCanvas.loadFromJSON(data.signature, sigCanvas.renderAll.bind(sigCanvas));
+
+        const inputs = document.querySelectorAll(".save-input");
+        (data.inputs || []).forEach((val, idx) => {
+            if (inputs[idx]) inputs[idx].value = val;
+        });
+
+        (data.canvases || []).forEach(item => {
+            if (!item || !item.id || !item.json || !canvasRegistry[item.id]) return;
+            canvasRegistry[item.id].loadFromJSON(item.json, canvasRegistry[item.id].renderAll.bind(canvasRegistry[item.id]));
+        });
+
+        if (sigCanvas) {
+            sigCanvas.clear();
+            sigCanvas.backgroundColor = "#fff";
+            if (data.signature) {
+                sigCanvas.loadFromJSON(data.signature, sigCanvas.renderAll.bind(sigCanvas));
+            } else {
+                sigCanvas.renderAll();
+            }
         }
-        
-        syncFields(document.getElementById('v-name').value);
+
+        const venueName = document.getElementById("v-name").value;
+        syncFields(venueName);
+        const region = document.getElementById("reg-sel").value;
+        toggleOS(region);
+        updatePageNumbers();
     }
+
+    window.onload = () => {
+        const el = document.getElementById("sig-canvas");
+        sigCanvas = new fabric.Canvas(el, { width: 260, height: 115, isDrawingMode: true, backgroundColor: "#fff" });
+        sigCanvas.freeDrawingBrush.color = "#000";
+        sigCanvas.freeDrawingBrush.width = 2;
+        updatePageNumbers();
+    };
 </script>
 </body>
 </html>
