@@ -38,7 +38,41 @@
         .note-area textarea { flex: 1; height: auto; min-height: 150mm; }
         .sig-container { align-self: flex-end; width: 70mm; margin-top: 5px; margin-bottom: 25px; }
         .sig-box { border: 2px dashed #000; background: #fff; height: 32mm; width: 100%; }
-        @media print { body { background: white; } .page { margin: 0; border: none; box-shadow: none; width: 210mm; min-height: 297mm; padding: 12mm 18mm 24mm; } .no-print, .controls-menu { display: none !important; } input, textarea { border: 2px solid #000 !important; } }
+        .ai-page { position: relative; }
+        .ai-watermark {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            font-weight: 800;
+            color: rgba(200, 0, 0, 0.18);
+            transform: rotate(-24deg);
+            letter-spacing: 2px;
+            user-select: none;
+            pointer-events: none;
+            z-index: 1;
+            text-transform: uppercase;
+        }
+        .ai-content {
+            position: relative;
+            z-index: 2;
+            margin-top: 8px;
+            border: 1px solid #bbb;
+            padding: 8px;
+            background: #fff;
+        }
+        .ai-content pre {
+            margin: 0;
+            font-size: 8.5px;
+            line-height: 1.35;
+            color: #111;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: Consolas, 'Courier New', monospace;
+        }
+        @media print { body { background: white; } .page { margin: 0; border: none; box-shadow: none; width: 210mm; min-height: 297mm; padding: 12mm 18mm 24mm; } .no-print, .controls-menu { display: none !important; } input, textarea { border: 2px solid #000 !important; } .canvas-wrapper.active-photo { box-shadow: none !important; } .canvas-wrapper.active-photo::after { border-color: #000 !important; } }
     </style>
 </head>
 <body>
@@ -73,19 +107,19 @@
         </div>
         <table class="data-table">
             <tr><td class="label">VENUE NAME</td><td><input type="text" id="v-name" oninput="syncFields(this.value)" placeholder="Example: Hong Kong Golf Club" class="save-input"></td></tr>
-            <tr><td class="label">REGION</td><td><select id="reg-sel" onchange="toggleOS(this.value)" class="save-input"><option>HONG KONG ISLAND</option><option>KOWLOON</option><option>NEW TERRITORIES</option><option value="OS">OVERSEAS</option></select><div id="os-box" style="display:none; margin-top:5px;">COUNTRY: <input type="text" placeholder="Example: Singapore" class="save-input"></div></td></tr>
-            <tr><td class="label">LEAD OFFICER</td><td><input type="text" placeholder="Example: Name" class="save-input"></td></tr>
-            <tr><td class="label">DATE OF VISIT</td><td><input type="date" class="save-input"></td></tr>
+            <tr><td class="label">REGION</td><td><select id="reg-sel" onchange="toggleOS(this.value)" class="save-input"><option>HONG KONG ISLAND</option><option>KOWLOON</option><option>NEW TERRITORIES</option><option value="OS">OVERSEAS</option></select><div id="os-box" style="display:none; margin-top:5px;">COUNTRY: <input id="os-country" type="text" placeholder="Example: Singapore" class="save-input"></div></td></tr>
+            <tr><td class="label">LEAD OFFICER</td><td><input id="lead-officer" type="text" placeholder="Example: Name" class="save-input"></td></tr>
+            <tr><td class="label">DATE OF VISIT</td><td><input id="visit-date" type="date" class="save-input"></td></tr>
         </table>
         <div class="footer"><span>VENUE: <span class="f-v">---</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL</span><span class="right-pg">PAGE 1</span></div>
     </div>
     <div class="page">
         <div class="header"><span>ID: <span class="id-txt">---</span></span><span>LOGISTICS</span></div>
         <table class="data-table">
-            <tr><td class="label">ADDRESS</td><td><textarea placeholder="Example: 19 Island Rd, Deep Water Bay" class="save-input"></textarea></td></tr>
-            <tr><td class="label">CONTACT PERSON</td><td><input type="text" placeholder="Example: Name" class="save-input"></td></tr>
-            <tr><td class="label">PHONE NUMBER</td><td><input type="tel" placeholder="Example: +852 1234 5678" class="save-input"></td></tr>
-            <tr><td class="label">PURPOSE OF VISIT</td><td><textarea style="height:100px;" placeholder="Example: Golf, Work, School, Appointment" class="save-input"></textarea></td></tr>
+            <tr><td class="label">ADDRESS</td><td><textarea id="address" placeholder="Example: 19 Island Rd, Deep Water Bay" class="save-input"></textarea></td></tr>
+            <tr><td class="label">CONTACT PERSON</td><td><input id="contact-person" type="text" placeholder="Example: Name" class="save-input"></td></tr>
+            <tr><td class="label">PHONE NUMBER</td><td><input id="phone-number" type="tel" placeholder="Example: +852 1234 5678" class="save-input"></td></tr>
+            <tr><td class="label">PURPOSE OF VISIT</td><td><textarea id="purpose-visit" style="height:100px;" placeholder="Example: Golf, Work, School, Appointment" class="save-input"></textarea></td></tr>
         </table>
         <div class="sig-container">
             <div class="no-print" style="text-align:right;"><button style="background:#e67e22; color:white; border:none; padding:4px; font-size:10px; cursor: pointer;" onclick="clearSignature()">CLEAR SIG</button></div>
@@ -95,9 +129,18 @@
         <div class="footer"><span>VENUE: <span class="f-v">---</span></span><span class="center-warn">PRIVATE & CONFIDENTIAL</span><span class="right-pg">PAGE 2</span></div>
     </div>
     <div id="dynamic-container"></div>
+    <div class="page ai-page">
+        <div class="header"><span>ID: <span class="id-txt">---</span></span><span>AI SUMMARY</span></div>
+        <div class="ai-watermark">INTENDED FOR AI</div>
+        <div class="ai-content">
+            <pre id="ai-summary-content">Loading AI summary...</pre>
+        </div>
+        <div class="footer"><span>VENUE: <span class="f-v">---</span></span><span class="center-warn">AI PARSING ONLY</span><span class="right-pg">PAGE 3</span></div>
+    </div>
 </div>
 <script>
     const reportID = "REC-" + Math.floor(100000 + Math.random() * 900000);
+    const reportCreatedAt = new Date().toISOString();
     document.querySelectorAll(".id-txt").forEach(e => e.innerText = reportID);
     const driveSearchURL = `https://drive.google.com/drive/search?q=${reportID}`;
     new QRCode(document.getElementById("qrcode"), { text: driveSearchURL, width: 130, height: 130 });
@@ -174,6 +217,7 @@
         parent.appendChild(pageDiv);
         ids.forEach(registerCanvas);
         updatePageNumbers();
+        renderAISummary();
     }
 
     function addNewNotePage() {
@@ -191,6 +235,7 @@
         `;
         parent.appendChild(pageDiv);
         updatePageNumbers();
+        renderAISummary();
     }
 
     function removePage(btn) {
@@ -209,6 +254,7 @@
             document.querySelectorAll(".canvas-wrapper").forEach(w => w.classList.remove("active-photo"));
         }
         updatePageNumbers();
+        renderAISummary();
     }
 
     function handleImage(input, canvasId) {
@@ -320,6 +366,7 @@
 
     function triggerFullSyncPrint() {
         document.title = reportID;
+        document.querySelectorAll(".canvas-wrapper").forEach(w => w.classList.remove("active-photo"));
         Object.values(canvasRegistry).forEach(c => {
             c.discardActiveObject();
             c.renderAll();
@@ -329,6 +376,54 @@
             sigCanvas.renderAll();
         }
         window.print();
+    }
+
+    function cleanText(v) {
+        return (v || "").toString().replace(/\s+/g, " ").trim();
+    }
+
+    function getValueById(id) {
+        const el = document.getElementById(id);
+        return el ? cleanText(el.value) : "";
+    }
+
+    function collectAISummaryData() {
+        const photoPages = document.querySelectorAll(".dynamic-page.photo-page").length;
+        const notePages = document.querySelectorAll(".dynamic-page.note-page").length;
+        const photoNotes = Array.from(document.querySelectorAll(".photo-block textarea")).map(t => cleanText(t.value)).filter(Boolean);
+        const additionalNotes = Array.from(document.querySelectorAll(".note-page .note-area textarea")).map(t => cleanText(t.value)).filter(Boolean);
+        const nowIso = new Date().toISOString();
+
+        return {
+            schema_version: "recce_ai_summary_v1",
+            report_id: reportID,
+            report_created_at: reportCreatedAt,
+            summary_generated_at: nowIso,
+            drive_search_url: driveSearchURL,
+            venue_name: getValueById("v-name"),
+            region: getValueById("reg-sel"),
+            overseas_country: getValueById("os-country"),
+            lead_officer: getValueById("lead-officer"),
+            date_of_visit: getValueById("visit-date"),
+            address: getValueById("address"),
+            contact_person: getValueById("contact-person"),
+            phone_number: getValueById("phone-number"),
+            purpose_of_visit: getValueById("purpose-visit"),
+            dynamic_photo_pages: photoPages,
+            dynamic_note_pages: notePages,
+            photo_note_count: photoNotes.length,
+            additional_note_count: additionalNotes.length,
+            photo_notes: photoNotes.length ? photoNotes.join(" | ") : "N/A",
+            additional_notes: additionalNotes.length ? additionalNotes.join(" | ") : "N/A"
+        };
+    }
+
+    function renderAISummary() {
+        const target = document.getElementById("ai-summary-content");
+        if (!target) return;
+        const data = collectAISummaryData();
+        const lines = Object.entries(data).map(([k, v]) => `${k}: ${v === "" ? "N/A" : v}`);
+        target.textContent = lines.join("\n");
     }
 
     function saveDraft() {
@@ -351,6 +446,7 @@
         };
 
         localStorage.setItem("recce_draft", JSON.stringify(data));
+        renderAISummary();
         alert("Draft Saved Successfully.");
     }
 
@@ -408,6 +504,7 @@
         const region = document.getElementById("reg-sel").value;
         toggleOS(region);
         updatePageNumbers();
+        renderAISummary();
     }
 
     window.onload = () => {
@@ -416,6 +513,17 @@
         sigCanvas.freeDrawingBrush.color = "#000";
         sigCanvas.freeDrawingBrush.width = 2;
         updatePageNumbers();
+        renderAISummary();
+        document.getElementById("capture-zone").addEventListener("input", (e) => {
+            if (e.target && (e.target.matches("input") || e.target.matches("textarea") || e.target.matches("select"))) {
+                renderAISummary();
+            }
+        });
+        document.getElementById("capture-zone").addEventListener("change", (e) => {
+            if (e.target && (e.target.matches("input") || e.target.matches("textarea") || e.target.matches("select"))) {
+                renderAISummary();
+            }
+        });
     };
 </script>
 </body>
